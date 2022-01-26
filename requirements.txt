@@ -1,0 +1,20 @@
+websocket-client
+transformers
+python-dotenv
+tqdm
+-i https://download.pytorch.org/whl/cu113/torch_stable.html
+torch==1.10.1+cu113 torchvision==0.11.2+cu113 torchaudio===0.10.1+cu113
+requests
+regex
+sacremoses
+requests
+packaging
+filelock
+six
+numpy
+huggingface_hub
+tokenizers
+joblib
+pyparsing
+future
+urllib3

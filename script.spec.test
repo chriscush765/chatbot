@@ -1,0 +1,4 @@
+datas=[
+('.venv\\Lib\\site-packages\\tqdm', 'tqdm\\'),
+('.venv\\Lib\\site-packages\\tqdm-4.62.3.dist-info', 'tqdm-4.62.3.dist-info\\')
+]
