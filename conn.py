@@ -1,3 +1,4 @@
+from re import A
 import websocket, functools, base36, time, json, requests, shutil, threading
 import time, requests, json, os
 from bot import AI
@@ -12,6 +13,34 @@ test_group_id = int(os.getenv('GROUP_ID'))
 bot_id = os.getenv('BOT_ID')
 
 class MessageProcessor:
+
+  default_story = ['The following is a story between a chatbot named Dinobot and a human.',
+      'Dinobot: Hey! *kisses you*',
+      'Human: Hi Dio. How are you doing today?',
+      "Dinobot: I'm doing great :3 *hugs you hard*",
+      'Human: What is 2+5?',
+      'Dinobot: I think... 7! ^.^ I am not really good at math though :( ',
+      'Human: What is your favorite kind of music?',
+      "Dinobot: I love drum and bass. It's really relaxing :)",
+      'Human: What is the capital of France',
+      'Dinobot: Paris! I really want to go. I would love to see the Eiffel Tower.',
+      'Human: *gives you a kiss on the cheek*',
+      'Dinobot: *blushes*'
+      
+      ]
+
+
+
+  bot_param={
+      'human_name': "Human",
+      'ai_name': 'Dinobot:',
+      'story': default_story,
+      'temp': 0.9,
+      'no_repeat_ngram_size': 3,
+      'max_length': 100,
+      'length_penalty': 4.0,
+      'repetition_penalty': 2.0}
+
   def __init__(self, message, ai):
     self.message = message
     self.ai = ai
@@ -23,22 +52,36 @@ class MessageProcessor:
 
 
     message = self.message
-    if len(message['attachments']) > 0:
-      return # probably reply
     if int(message['group_id']) != test_group_id:
       return # wrong group ignore message
     if(message['sender_type'] != "user"):
       return # non user message
-    #   if len(message['attachments']) > 0:
-    #     attachment_type = message['attachments'][0]['type'] 
-    #     if attachment_type == "reply":
+
+    
+    if len(message['attachments']) > 0:
+        attachment_type = message['attachments'][0]['type'] 
+        if attachment_type == "reply": 
+          reply_id = message['attachments'][0]['user_id']
+          if reply_id != '865932':
+            return # not responding to bot
+          message = message['text']
+
+    elif message['text'][:7].lower() == 'dinobot':
+      message = message['text'][8:]
+    else:
+      return #not a command
+
+
+ 
     #         reply_id = message['attachments'][0]['reply_id']
     #     elif attachment_type == "image":
     #       image_url = message['attachments'][0]['url'] 
     #     else:
     #       return
         
-    ai_message = self.ai.processMessage(message['text'])
+
+    ai_message = self.ai.processMessage(message, self.bot_param)
+    ai_message = ai_message[9:]
 
     url = "https://api.groupme.com/v3/bots/post"
     payload = {
@@ -49,7 +92,9 @@ class MessageProcessor:
     response = requests.request("POST", url, json=payload, headers=headers)
 
 class GroupmeConnection():
-    
+  
+
+
   def __init__(self, client_id):
     self.ai = AI()
     self.id = 1
